@@ -13,12 +13,24 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 ## System dependencies are found with CMake's conventions
-find_library(GPD_LIB NAMES gpd PATHS /usr/local/lib PATH_SUFFIXES lib NO_DEFAULT_PATH)
+find_library(GPD_LIB NAMES gpd PATHS /usr/local/lib ~/local/lib/ PATH_SUFFIXES lib NO_DEFAULT_PATH)
 if (GPD_LIB)
   message(STATUS "Library GPD found in ${GPD_LIB}")
 else()
   message(FATAL_ERROR "Library GPD not found")
 endif()
+
+find_path(GPD_LIB_INCLUDE_DIR NAMES gpd PATHS /usr/local/include ~/local/include NO_DEFAULT_PATH)
+if (GPD_LIB_INCLUDE_DIR)
+	message(STATUS "Include directory GPD found in ${GPD_LIB_INCLUDE_DIR}")
+else()
+  message(FATAL_ERROR "Include directory GPD not found")
+endif()
+
+find_package(OpenCV REQUIRED PATHS ~/local/ NO_DEFAULT_PATH)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+
 include_directories(${GPD_LIB_INCLUDE_DIR})
 message(STATUS "gpd_include_dir: ${GPD_LIB_INCLUDE_DIR}")
 
@@ -29,7 +41,7 @@ add_message_files(FILES CloudIndexed.msg CloudSamples.msg CloudSources.msg Grasp
   SamplesMsg.msg)
 
 ## Generate services in the 'srv' folder
-add_service_files(FILES detect_grasps.srv)
+add_service_files(FILES detect_grasps.srv detect_grasps_prl.srv)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(DEPENDENCIES geometry_msgs sensor_msgs std_msgs)
@@ -67,10 +79,12 @@ add_library(${PROJECT_NAME}_grasp_plotter src/${PROJECT_NAME}/grasp_plotter.cpp)
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}_detect_grasps src/gpd_ros/grasp_detection_node.cpp)
 add_executable(${PROJECT_NAME}_detect_grasps_server src/gpd_ros/grasp_detection_server.cpp)
+add_executable(${PROJECT_NAME}_detect_grasps_server_prl src/gpd_ros/grasp_detection_server_prl.cpp)
 
 ## Rename C++ executable without prefix
 set_target_properties(${PROJECT_NAME}_detect_grasps PROPERTIES OUTPUT_NAME detect_grasps PREFIX "")
 set_target_properties(${PROJECT_NAME}_detect_grasps_server PROPERTIES OUTPUT_NAME detect_grasps_server PREFIX "")
+set_target_properties(${PROJECT_NAME}_detect_grasps_server_prl PROPERTIES OUTPUT_NAME detect_grasps_server_prl PREFIX "")
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_detect_grasps
@@ -80,6 +94,12 @@ target_link_libraries(${PROJECT_NAME}_detect_grasps
                       ${PCL_LIBRARIES}
                       ${catkin_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_detect_grasps_server
+                      ${PROJECT_NAME}_grasp_messages
+                      ${PROJECT_NAME}_grasp_plotter
+                      ${GPD_LIB}
+                      ${PCL_LIBRARIES}
+                      ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_detect_grasps_server_prl
                       ${PROJECT_NAME}_grasp_messages
                       ${PROJECT_NAME}_grasp_plotter
                       ${GPD_LIB}
