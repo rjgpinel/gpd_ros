@@ -52,6 +52,7 @@
 
 // GPD
 #include <gpd/util/cloud.h>
+#include <gpd/util/config_file.h>
 #include <gpd/grasp_detector.h>
 
 // this project (services)
@@ -64,6 +65,7 @@
 // this project (headers)
 #include <gpd_ros/grasp_messages.h>
 #include <gpd_ros/grasp_plotter.h>
+
 
 typedef pcl::PointCloud<pcl::PointXYZRGBA> PointCloudRGBA;
 typedef pcl::PointCloud<pcl::PointNormal> PointCloudPointNormal;

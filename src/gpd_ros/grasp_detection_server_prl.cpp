@@ -6,6 +6,15 @@ GraspDetectionServerPRL::GraspDetectionServerPRL(ros::NodeHandle& node){
   node.param("config_file", cfg_file, std::string(""));
   grasp_detector_ = new gpd::GraspDetector(cfg_file);
 
+  // Read parameters from configuration file.
+  gpd::util::ConfigFile config_file(cfg_file);
+  config_file.ExtractKeys();
+
+  std::vector<double> camera_position =
+    config_file.getValueOfKeyAsStdVectorDouble("camera_position",
+                                               "0.0 0.0 0.0");
+  view_point_ << camera_position[0], camera_position[1], camera_position[2];
+
   std::string rviz_topic;
   node.param("rviz_topic", rviz_topic, std::string(""));
 
